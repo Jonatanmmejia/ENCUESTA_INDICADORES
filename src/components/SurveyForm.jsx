@@ -85,13 +85,20 @@ const SurveyForm = ({ isClientMode = false }) => {
             const code = answerList[0]; // 'F' or 'D'
             const question = QUESTIONS.find(q => q.id === qId);
 
+            const codeMaps = {
+                'F': 'Fortaleza',
+                'D': 'Debilidad',
+                'O': 'Oportunidad',
+                'A': 'Amenaza'
+            };
+
             return {
                 fecha: new Date().toLocaleString(), // Local readable time for Excel
                 rol: role,
                 area: question?.area || "Desconocida",
                 categoria: question?.category || "Desconocida",
                 pregunta: question?.text || "Texto no encontrado",
-                respuesta: code === 'F' ? "Fortaleza" : (code === 'D' ? "Debilidad" : code)
+                respuesta: codeMaps[code] || code
             };
         });
 
@@ -218,7 +225,7 @@ const SurveyForm = ({ isClientMode = false }) => {
         <div className="space-y-8 relative">
             <div className="text-center space-y-4 mb-12">
                 <h1 className="text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-violet-400 drop-shadow-sm">
-                    {isClientMode ? "Sección de Clientes" : "Encuesta Profesional"}
+                    {isClientMode ? "Evaluación de Clientes" : "Evaluación de Indicadores"}
                 </h1>
 
                 {isClientMode ? (
