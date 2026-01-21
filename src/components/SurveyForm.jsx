@@ -3,7 +3,7 @@ import { ROLES, AREAS, QUESTIONS } from '../data/mockData';
 import QuestionCard from './QuestionCard';
 import AdminImporter from './AdminImporter';
 import { Filter, Search, Settings, Send, AlertTriangle, Briefcase, Layers, Check } from 'lucide-react';
-import { Filter, Search, Settings, Send, AlertTriangle, Briefcase, Layers, Check } from 'lucide-react';
+
 
 const SurveyForm = ({ isClientMode = false }) => {
     const [showAdmin, setShowAdmin] = useState(false);
