@@ -2,7 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { ROLES, AREAS, QUESTIONS } from '../data/mockData';
 import QuestionCard from './QuestionCard';
 import AdminImporter from './AdminImporter';
-import { Filter, Search, Settings, Send, AlertTriangle, Briefcase, Layers } from 'lucide-react';
+import { Filter, Search, Settings, Send, AlertTriangle, Briefcase, Layers, Check } from 'lucide-react';
+import { Filter, Search, Settings, Send, AlertTriangle, Briefcase, Layers, Check } from 'lucide-react';
 
 const SurveyForm = ({ isClientMode = false }) => {
     const [showAdmin, setShowAdmin] = useState(false);
@@ -11,6 +12,7 @@ const SurveyForm = ({ isClientMode = false }) => {
     // Area filter REMOVED - Area is now a grouping header
     const [responses, setResponses] = useState({});
     const [showWelcome, setShowWelcome] = useState(true);
+    const [submitted, setSubmitted] = useState(false);
 
     // Sync role if mode changes dynamically
     React.useEffect(() => {
@@ -96,24 +98,7 @@ const SurveyForm = ({ isClientMode = false }) => {
         // Debug: Log to see what we are sending
         console.log("Datos a enviar:", richData);
 
-        // 1. JSON Download (Backup/Verification)
-        const exportData = {
-            metadata: {
-                role,
-                timestamp: new Date().toISOString(),
-                totalRespuestas: richData.length
-            },
-            detalles: richData
-        };
-
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Respuestas_${role}_${new Date().getTime()}.json`;
-        a.click();
-
-        // 2. Google Sheets Integration (LIVE)
+        // Google Sheets Integration (LIVE)
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxEBcK45-SbOCraGhBphGlXXxdcwvnHmp8shfOipLnlXUwSSkvIh9veDcMM56C0XNd2/exec";
 
         fetch(GOOGLE_SCRIPT_URL, {
@@ -123,12 +108,49 @@ const SurveyForm = ({ isClientMode = false }) => {
             body: JSON.stringify(richData)
         })
             .then(() => {
-                console.log("Datos enviados a Google Sheets");
+                console.log("Enviado a Google Sheets");
             })
             .catch(err => console.error("Error enviando a Google Sheets", err));
 
-        alert("¡Encuesta Finalizada! Sus respuestas han sido enviadas exitosamente.");
+        // Show Success Screen immediately (don't wait for fetch since no-cors is opaque)
+        setSubmitted(true);
     };
+
+    if (submitted) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8 animate-in fade-in zoom-in duration-500">
+                <div className="glass max-w-lg p-12 rounded-3xl text-center space-y-8 border-t-4 border-green-500 shadow-2xl relative overflow-hidden">
+                    {/* Background glow */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-32 bg-green-500/20 blur-3xl rounded-full pointer-events-none"></div>
+
+                    <div className="flex justify-center relative">
+                        <div className="p-6 bg-green-500/10 rounded-full text-green-400 ring-4 ring-green-500/20 animate-bounce-slow">
+                            <Check size={64} strokeWidth={3} />
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <h2 className="text-4xl font-extrabold text-white tracking-tight">
+                            ¡Respuestas Enviadas!
+                        </h2>
+                        <p className="text-slate-300 text-lg">
+                            Gracias por su tiempo y apoyo. <br />
+                            Sus respuestas han sido registradas exitosamente.
+                        </p>
+                    </div>
+
+                    <div className="pt-4">
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="text-slate-500 hover:text-white text-sm underline underline-offset-4 transition-colors"
+                        >
+                            Volver al inicio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (showWelcome) {
         return (
