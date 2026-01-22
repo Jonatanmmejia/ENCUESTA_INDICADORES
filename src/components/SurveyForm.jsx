@@ -81,26 +81,30 @@ const SurveyForm = ({ isClientMode = false }) => {
 
     const handleSubmit = () => {
         // Enrich the data: Map ID -> Full Question Details
-        const richData = Object.entries(responses).map(([qId, answerList]) => {
-            const code = answerList[0]; // 'F' or 'D'
-            const question = QUESTIONS.find(q => q.id === qId);
+        // Enrich the data: Map ID -> Full Question Details
+        // FILTER: Only include questions that actually have an answer selected (length > 0)
+        const richData = Object.entries(responses)
+            .filter(([_, answerList]) => answerList && answerList.length > 0)
+            .map(([qId, answerList]) => {
+                const code = answerList[0]; // 'F' or 'D'
+                const question = QUESTIONS.find(q => q.id === qId);
 
-            const codeMaps = {
-                'F': 'Fortaleza',
-                'D': 'Debilidad',
-                'O': 'Oportunidad',
-                'A': 'Amenaza'
-            };
+                const codeMaps = {
+                    'F': 'Fortaleza',
+                    'D': 'Debilidad',
+                    'O': 'Oportunidad',
+                    'A': 'Amenaza'
+                };
 
-            return {
-                fecha: new Date().toLocaleString(), // Local readable time for Excel
-                rol: role,
-                area: question?.area || "Desconocida",
-                categoria: question?.category || "Desconocida",
-                pregunta: question?.text || "Texto no encontrado",
-                respuesta: codeMaps[code] || code
-            };
-        });
+                return {
+                    fecha: new Date().toLocaleString(), // Local readable time for Excel
+                    rol: role,
+                    area: question?.area || "Desconocida",
+                    categoria: question?.category || "Desconocida",
+                    pregunta: question?.text || "Texto no encontrado",
+                    respuesta: codeMaps[code] || code
+                };
+            });
 
         // Debug: Log to see what we are sending
         console.log("Datos a enviar:", richData);
